@@ -2,11 +2,11 @@
 
 namespace App\Entity;
 
-use App\Repository\CommentairesRepository;
+use App\Repository\CommentaireRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: CommentairesRepository::class)]
-class Commentaires
+#[ORM\Entity(repositoryClass: CommentaireRepository::class)]
+class Commentaire
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -17,13 +17,13 @@ class Commentaires
     private ?string $contenu = null;
 
     #[ORM\Column]
-    private ?\DateTimeImmutable $created_at = null;
+    private ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\ManyToOne(inversedBy: 'commentaires')]
-    private ?Users $createur = null;
+    private ?User $createur = null;
 
     #[ORM\ManyToOne(inversedBy: 'commentaires')]
-    private ?Publications $publication = null;
+    private ?Publication $publication = null;
 
     public function getId(): ?int
     {
@@ -44,34 +44,34 @@ class Commentaires
 
     public function getCreatedAt(): ?\DateTimeImmutable
     {
-        return $this->created_at;
+        return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTimeImmutable $created_at): self
+    public function setCreatedAt(\DateTimeImmutable $createdAt): self
     {
-        $this->created_at = $created_at;
+        $this->createdAt = $createdAt;
 
         return $this;
     }
 
-    public function getCreateur(): ?Users
+    public function getCreateur(): ?User
     {
         return $this->createur;
     }
 
-    public function setCreateur(?Users $createur): self
+    public function setCreateur(?User $createur): self
     {
         $this->createur = $createur;
 
         return $this;
     }
 
-    public function getPublication(): ?Publications
+    public function getPublication(): ?Publication
     {
         return $this->publication;
     }
 
-    public function setPublication(?Publications $publication): self
+    public function setPublication(?Publication $publication): self
     {
         $this->publication = $publication;
 

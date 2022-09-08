@@ -2,43 +2,59 @@
 
 namespace App\Entity;
 
-use App\Repository\UsersRepository;
+use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
-#[ORM\Entity(repositoryClass: UsersRepository::class)]
-class Users
+#[ORM\Entity(repositoryClass: UserRepository::class)]
+#[UniqueEntity(fields: ['email'], message: 'There is already an account with this email')]
+class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 180, unique: true)]
     private ?string $email = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $prénom = null;
+    #[ORM\Column]
+    private array $roles = [];
+
+    /**
+     * @var string The hashed password
+     */
+    #[ORM\Column]
+    private ?string $password = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $pseudo = null;
+    private ?string $prenom = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $avatar = null;
+    private ?string $pseudo = "";
+
+    #[ORM\Column(length: 255)]
+    private ?string $avatar = "";
 
     #[ORM\Column(type: Types::DATE_IMMUTABLE)]
     private ?\DateTimeImmutable $birthday = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $biographie = null;
+    private ?string $biographie = "";
 
-    #[ORM\OneToMany(mappedBy: 'createur', targetEntity: Publications::class)]
+    #[ORM\OneToMany(mappedBy: 'createur', targetEntity: Publication::class)]
     private Collection $publications;
 
-    #[ORM\OneToMany(mappedBy: 'createur', targetEntity: Commentaires::class)]
+    #[ORM\OneToMany(mappedBy: 'createur', targetEntity: Commentaire::class)]
     private Collection $commentaires;
+
+    #[ORM\Column(type: 'boolean')]
+    private $isVerified = false;
 
     public function __construct()
     {
@@ -63,14 +79,67 @@ class Users
         return $this;
     }
 
-    public function getPrénom(): ?string
+    /**
+     * A visual identifier that represents this user.
+     *
+     * @see UserInterface
+     */
+    public function getUserIdentifier(): string
     {
-        return $this->prénom;
+        return (string) $this->email;
     }
 
-    public function setPrénom(string $prénom): self
+    /**
+     * @see UserInterface
+     */
+    public function getRoles(): array
     {
-        $this->prénom = $prénom;
+        $roles = $this->roles;
+        // guarantee every user at least has ROLE_USER
+        $roles[] = 'ROLE_USER';
+
+        return array_unique($roles);
+    }
+
+    public function setRoles(array $roles): self
+    {
+        $this->roles = $roles;
+
+        return $this;
+    }
+
+    /**
+     * @see PasswordAuthenticatedUserInterface
+     */
+    public function getPassword(): string
+    {
+        return $this->password;
+    }
+
+    public function setPassword(string $password): self
+    {
+        $this->password = $password;
+
+        return $this;
+    }
+
+    /**
+     * @see UserInterface
+     */
+    public function eraseCredentials()
+    {
+        // If you store any temporary, sensitive data on the user, clear it here
+        // $this->plainPassword = null;
+    }
+
+    public function getPrenom(): ?string
+    {
+        return $this->prenom;
+    }
+
+    public function setPrenom(string $prenom): self
+    {
+        $this->prenom = $prenom;
 
         return $this;
     }
@@ -124,14 +193,14 @@ class Users
     }
 
     /**
-     * @return Collection<int, Publications>
+     * @return Collection<int, Publication>
      */
     public function getPublications(): Collection
     {
         return $this->publications;
     }
 
-    public function addPublication(Publications $publication): self
+    public function addPublication(Publication $publication): self
     {
         if (!$this->publications->contains($publication)) {
             $this->publications->add($publication);
@@ -141,7 +210,7 @@ class Users
         return $this;
     }
 
-    public function removePublication(Publications $publication): self
+    public function removePublication(Publication $publication): self
     {
         if ($this->publications->removeElement($publication)) {
             // set the owning side to null (unless already changed)
@@ -154,14 +223,14 @@ class Users
     }
 
     /**
-     * @return Collection<int, Commentaires>
+     * @return Collection<int, Commentaire>
      */
     public function getCommentaires(): Collection
     {
         return $this->commentaires;
     }
 
-    public function addCommentaire(Commentaires $commentaire): self
+    public function addCommentaire(Commentaire $commentaire): self
     {
         if (!$this->commentaires->contains($commentaire)) {
             $this->commentaires->add($commentaire);
@@ -171,7 +240,7 @@ class Users
         return $this;
     }
 
-    public function removeCommentaire(Commentaires $commentaire): self
+    public function removeCommentaire(Commentaire $commentaire): self
     {
         if ($this->commentaires->removeElement($commentaire)) {
             // set the owning side to null (unless already changed)
@@ -179,6 +248,18 @@ class Users
                 $commentaire->setCreateur(null);
             }
         }
+
+        return $this;
+    }
+
+    public function isVerified(): bool
+    {
+        return $this->isVerified;
+    }
+
+    public function setIsVerified(bool $isVerified): self
+    {
+        $this->isVerified = $isVerified;
 
         return $this;
     }

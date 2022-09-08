@@ -2,13 +2,13 @@
 
 namespace App\Entity;
 
-use App\Repository\PublicationsRepository;
+use App\Repository\PublicationRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: PublicationsRepository::class)]
-class Publications
+#[ORM\Entity(repositoryClass: PublicationRepository::class)]
+class Publication
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -19,12 +19,12 @@ class Publications
     private ?string $contenu = null;
 
     #[ORM\Column]
-    private ?\DateTimeImmutable $created_at = null;
+    private ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\ManyToOne(inversedBy: 'publications')]
-    private ?Users $createur = null;
+    private ?User $createur = null;
 
-    #[ORM\OneToMany(mappedBy: 'publication', targetEntity: Commentaires::class)]
+    #[ORM\OneToMany(mappedBy: 'publication', targetEntity: Commentaire::class)]
     private Collection $commentaires;
 
     public function __construct()
@@ -51,22 +51,22 @@ class Publications
 
     public function getCreatedAt(): ?\DateTimeImmutable
     {
-        return $this->created_at;
+        return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTimeImmutable $created_at): self
+    public function setCreatedAt(\DateTimeImmutable $createdAt): self
     {
-        $this->created_at = $created_at;
+        $this->createdAt = $createdAt;
 
         return $this;
     }
 
-    public function getCreateur(): ?Users
+    public function getCreateur(): ?User
     {
         return $this->createur;
     }
 
-    public function setCreateur(?Users $createur): self
+    public function setCreateur(?User $createur): self
     {
         $this->createur = $createur;
 
@@ -74,14 +74,14 @@ class Publications
     }
 
     /**
-     * @return Collection<int, Commentaires>
+     * @return Collection<int, Commentaire>
      */
     public function getCommentaires(): Collection
     {
         return $this->commentaires;
     }
 
-    public function addCommentaire(Commentaires $commentaire): self
+    public function addCommentaire(Commentaire $commentaire): self
     {
         if (!$this->commentaires->contains($commentaire)) {
             $this->commentaires->add($commentaire);
@@ -91,7 +91,7 @@ class Publications
         return $this;
     }
 
-    public function removeCommentaire(Commentaires $commentaire): self
+    public function removeCommentaire(Commentaire $commentaire): self
     {
         if ($this->commentaires->removeElement($commentaire)) {
             // set the owning side to null (unless already changed)
