@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\UsersRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -31,6 +33,18 @@ class Users
 
     #[ORM\Column(length: 255)]
     private ?string $biographie = null;
+
+    #[ORM\OneToMany(mappedBy: 'createur', targetEntity: Publications::class)]
+    private Collection $publications;
+
+    #[ORM\OneToMany(mappedBy: 'createur', targetEntity: Commentaires::class)]
+    private Collection $commentaires;
+
+    public function __construct()
+    {
+        $this->publications = new ArrayCollection();
+        $this->commentaires = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -105,6 +119,66 @@ class Users
     public function setBiographie(string $biographie): self
     {
         $this->biographie = $biographie;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Publications>
+     */
+    public function getPublications(): Collection
+    {
+        return $this->publications;
+    }
+
+    public function addPublication(Publications $publication): self
+    {
+        if (!$this->publications->contains($publication)) {
+            $this->publications->add($publication);
+            $publication->setCreateur($this);
+        }
+
+        return $this;
+    }
+
+    public function removePublication(Publications $publication): self
+    {
+        if ($this->publications->removeElement($publication)) {
+            // set the owning side to null (unless already changed)
+            if ($publication->getCreateur() === $this) {
+                $publication->setCreateur(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Commentaires>
+     */
+    public function getCommentaires(): Collection
+    {
+        return $this->commentaires;
+    }
+
+    public function addCommentaire(Commentaires $commentaire): self
+    {
+        if (!$this->commentaires->contains($commentaire)) {
+            $this->commentaires->add($commentaire);
+            $commentaire->setCreateur($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCommentaire(Commentaires $commentaire): self
+    {
+        if ($this->commentaires->removeElement($commentaire)) {
+            // set the owning side to null (unless already changed)
+            if ($commentaire->getCreateur() === $this) {
+                $commentaire->setCreateur(null);
+            }
+        }
 
         return $this;
     }
